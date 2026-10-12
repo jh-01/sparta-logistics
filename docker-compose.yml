@@ -1,0 +1,103 @@
+# 실행 전 jar 빌드 필요:  ./gradlew bootJar  (Windows: gradlew.bat bootJar)
+# 실행:                   docker compose up -d --build
+
+# 폴더명이 한글이면 프로젝트명이 비어 실행이 안 되므로 직접 지정
+name: sparta-logistics
+
+x-service-env: &service-env
+  DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-logistics}
+  DB_USERNAME: ${DB_USERNAME:-postgres}
+  DB_PASSWORD: ${DB_PASSWORD:-postgres}
+  EUREKA_URL: http://eureka-server:8761/eureka/
+
+x-service-depends: &service-depends
+  postgres:
+    condition: service_healthy
+  eureka-server:
+    condition: service_healthy
+
+services:
+  postgres:
+    image: postgres:18
+    container_name: postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME:-logistics}
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      # PostgreSQL 18 이미지부터 데이터 경로가 /var/lib/postgresql 로 변경됨
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      # pg_isready는 DB가 없어도 통과하므로 실제 접속까지 확인
+      test: ["CMD-SHELL", "psql -U $${POSTGRES_USER} -d $${POSTGRES_DB} -c 'SELECT 1' > /dev/null"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  eureka-server:
+    build: ./eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8761/eureka/apps > /dev/null"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 30s
+
+  gateway:
+    build: ./gateway
+    container_name: gateway
+    environment:
+      EUREKA_URL: http://eureka-server:8761/eureka/
+    ports:
+      - "19091:19091"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    environment: *service-env
+    ports:
+      - "19092:19092"
+    depends_on: *service-depends
+
+  hub-service:
+    build: ./hub-service
+    container_name: hub-service
+    environment: *service-env
+    ports:
+      - "19093:19093"
+    depends_on: *service-depends
+
+  company-service:
+    build: ./company-service
+    container_name: company-service
+    environment: *service-env
+    ports:
+      - "19094:19094"
+    depends_on: *service-depends
+
+  order-service:
+    build: ./order-service
+    container_name: order-service
+    environment: *service-env
+    ports:
+      - "19095:19095"
+    depends_on: *service-depends
+
+  delivery-service:
+    build: ./delivery-service
+    container_name: delivery-service
+    environment: *service-env
+    ports:
+      - "19096:19096"
+    depends_on: *service-depends
+
+volumes:
+  postgres-data:

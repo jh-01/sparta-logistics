@@ -1,0 +1,38 @@
+server:
+  port: 19091
+
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: user-service
+              uri: lb://user-service
+              predicates:
+                - Path=/api/users/**, /api/auth/**
+            - id: hub-service
+              uri: lb://hub-service
+              predicates:
+                - Path=/api/hubs/**
+            - id: company-service
+              uri: lb://company-service
+              predicates:
+                - Path=/api/companies/**
+            - id: order-service
+              uri: lb://order-service
+              predicates:
+                - Path=/api/orders/**
+            - id: delivery-service
+              uri: lb://delivery-service
+              predicates:
+                - Path=/api/deliveries/**
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}

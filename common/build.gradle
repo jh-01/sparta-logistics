@@ -1,0 +1,8 @@
+// 실행 앱이 아닌 공용 라이브러리 모듈
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+}
