@@ -2,12 +2,15 @@ server:
   port: 19095
 
 spring:
+  config:
+    # IDE에서 직접 실행할 때 루트 .env 를 읽음 (Docker 에서는 compose 가 환경변수로 주입)
+    import: optional:file:.env[.properties],optional:file:../.env[.properties]
   application:
     name: order-service
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/logistics}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     open-in-view: false
     hibernate:

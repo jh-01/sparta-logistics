@@ -1,3 +1,4 @@
+# 최초 1회:              .env.example 을 .env 로 복사한 뒤 DB 계정 정보 입력 (.env 는 git에 올리지 않음)
 # 실행 전 jar 빌드 필요:  ./gradlew bootJar  (Windows: gradlew.bat bootJar)
 # 실행:                   docker compose up -d --build
 
@@ -6,8 +7,8 @@ name: sparta-logistics
 
 x-service-env: &service-env
   DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-logistics}
-  DB_USERNAME: ${DB_USERNAME:-postgres}
-  DB_PASSWORD: ${DB_PASSWORD:-postgres}
+  DB_USERNAME: ${DB_USERNAME:?.env 파일에 DB_USERNAME을 설정하세요}
+  DB_PASSWORD: ${DB_PASSWORD:?.env 파일에 DB_PASSWORD를 설정하세요}
   EUREKA_URL: http://eureka-server:8761/eureka/
 
 x-service-depends: &service-depends
@@ -22,8 +23,8 @@ services:
     container_name: postgres
     environment:
       POSTGRES_DB: ${DB_NAME:-logistics}
-      POSTGRES_USER: ${DB_USERNAME:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_USER: ${DB_USERNAME:?.env 파일에 DB_USERNAME을 설정하세요}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?.env 파일에 DB_PASSWORD를 설정하세요}
     ports:
       - "5432:5432"
     volumes:

@@ -25,7 +25,10 @@ HELP.md
 logs/
 
 ### 로컬 환경/비밀값 ###
+# 모든 위치의 .env, .env.local 등은 무시하고 양식 파일(.env.example)만 허용
 .env
+.env.*
+!.env.example
 application-local.yml
 
 ### OS ###
